@@ -35,8 +35,7 @@ The application follows a three-tier microservices architecture:
 ![alt text](images/image-2.png)
 
 ### K8s workflow:
-![alt text](images/image-3.png)
-
+![alt text](images/image.png)
 - **Frontend Service**: Serves static content and routes API requests
 - **Backend Service**: Processes HTTP requests and manages database operations
 - **Database Service**: Stores application data persistently
