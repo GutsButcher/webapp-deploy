@@ -9,5 +9,5 @@ fi
 cd /app
 pm2-runtime start server.js --name backend
 
-# Keep container running
+# Keep container running even with error
 tail -f /dev/null
