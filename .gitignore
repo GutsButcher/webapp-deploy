@@ -1,6 +1,7 @@
 # Docker secrets
 **/secrets/
 
+
 # Node.js
 **/node_modules/
 **/npm-debug.log
@@ -37,6 +38,9 @@ yarn-error.log*
 **/data/
 **/mysql_data/
 
+# Others
+**/*secret*
+**/*key*
 # Package locks (if you want to ignore them)
 # **/package-lock.json
 # **/yarn.lock
