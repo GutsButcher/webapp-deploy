@@ -32,8 +32,7 @@ The application is built using:
 The application follows a three-tier microservices architecture:
 
 ### Docker-compose workflow:
-![alt text](images/image-2.png)
-
+![alt text](images/image-5.png)
 ### K8s workflow:
 ![alt text](images/image.png)
 - **Frontend Service**: Serves static content and routes API requests
