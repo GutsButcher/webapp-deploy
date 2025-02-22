@@ -1,19 +1,40 @@
 stages:
-    - build
-    - deploy
+  - build
+  - deploy
+
+variables:
+  DOCKER_REGISTRY: registry.gitlab.com/gwynbliedd1/webapp-deploy
 
 build_images:
-    stage: build
-    image: docker:20.10.16
-    services:
-        - docker:20.10.16-dind
-    script:
-        - echo "We Are Building"
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $DOCKER_REGISTRY/frontend:latest ./dockerfiles/frontend
+    - docker build -t $DOCKER_REGISTRY/backend:latest ./dockerfiles/backend
+    - docker build -t $DOCKER_REGISTRY/mysql:latest ./dockerfiles/mysql
+    - docker push $DOCKER_REGISTRY/frontend:latest
+    - docker push $DOCKER_REGISTRY/backend:latest
+    - docker push $DOCKER_REGISTRY/mysql:latest
 
 deploy_to_k8s:
-    stage: deploy
-    image: bitnami/kubectl:latest
-    script:
-        - echo "This will deploy to your EKS cluster"
-    only:
-        - main
+  stage: deploy
+  image: 
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  before_script:
+    - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
+    - export KUBECONFIG=kubeconfig.yaml
+  script:
+    # Create MySQL password secret
+    - kubectl create secret generic mysql-secret --from-literal=MYSQL_ROOT_PASSWORD=SecurePassword --dry-run=client -o yaml | kubectl apply -f -
+    # Apply Kubernetes manifests
+    - kubectl apply -f k8s/db-yamls/
+    - kubectl apply -f k8s/backend-yamls/
+    - kubectl apply -f k8s/frontend-yamls/
+    - kubectl apply -f k8s/ingress-yamls/
+  only:
+    - main
