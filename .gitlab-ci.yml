@@ -30,15 +30,18 @@ variables:
 debug:
   stage: deploy
   image: 
-    name: amazon/aws-cli:latest
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest  # This image has both AWS CLI and kubectl
   before_script:
-    - yum install -y kubectl
     - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
     - export KUBECONFIG=kubeconfig.yaml
     # Add AWS credentials
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     - export AWS_DEFAULT_REGION=us-east-1
+    # Verify AWS CLI works
+    - aws sts get-caller-identity
+    # Test kubectl
+    - kubectl version --client
   script:
     - kubectl get nodes
 
