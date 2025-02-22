@@ -1,5 +1,6 @@
 stages:
   - build
+  - debug
   - deploy
 
 variables:
@@ -8,24 +9,44 @@ variables:
   CI_DEPLOY_USER: gwynbliedd1    # The username shown in deploy token
   CI_DEPLOY_PASSWORD:  gldt-s-P5uiyza1wDpgeQvPzu # The token value
 
-build_images:
-  stage: build
-  image: docker:20.10.16
-  services:
-    - docker:20.10.16-dind
-  before_script: [
-    'echo "Registry: $CI_REGISTRY"',
-    'echo "Registry User: $CI_DEPLOY_USER"',
-    'echo "Docker Registry: $DOCKER_REGISTRY"',
-    'echo "$CI_DEPLOY_PASSWORD" | docker login $CI_REGISTRY -u $CI_DEPLOY_USER --password-stdin'
-  ]
+# build_images:
+#   stage: build
+#   image: docker:20.10.16
+#   services:
+#     - docker:20.10.16-dind
+#   before_script: [
+#     'echo "Registry: $CI_REGISTRY"',
+#     'echo "Registry User: $CI_DEPLOY_USER"',
+#     'echo "Docker Registry: $DOCKER_REGISTRY"',
+#     'echo "$CI_DEPLOY_PASSWORD" | docker login $CI_REGISTRY -u $CI_DEPLOY_USER --password-stdin'
+#   ]
+#   script:
+#     - docker build -t $DOCKER_REGISTRY/frontend:latest ./dockerfiles/frontend
+#     - docker build -t $DOCKER_REGISTRY/backend:latest ./dockerfiles/backend
+#     - docker build -t $DOCKER_REGISTRY/mysql:latest ./dockerfiles/mysql
+#     - docker push $DOCKER_REGISTRY/frontend:latest
+#     - docker push $DOCKER_REGISTRY/backend:latest
+#     - docker push $DOCKER_REGISTRY/mysql:latest
+debug_k8s:
+  stage: debug
+  image: 
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  before_script:
+    # Debug steps
+    - echo "Checking if KUBE_CONFIG variable exists:"
+    - if [ -n "$KUBE_CONFIG" ]; then echo "KUBE_CONFIG is set"; else echo "KUBE_CONFIG is not set"; fi
+    - echo "Decoding and saving kubeconfig:"
+    - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
+    - echo "Checking kubeconfig file content:"
+    - cat kubeconfig.yaml
+    - echo "Setting KUBECONFIG environment variable:"
+    - export KUBECONFIG=kubeconfig.yaml
+    - echo "Current working directory:"
+    - pwd
   script:
-    - docker build -t $DOCKER_REGISTRY/frontend:latest ./dockerfiles/frontend
-    - docker build -t $DOCKER_REGISTRY/backend:latest ./dockerfiles/backend
-    - docker build -t $DOCKER_REGISTRY/mysql:latest ./dockerfiles/mysql
-    - docker push $DOCKER_REGISTRY/frontend:latest
-    - docker push $DOCKER_REGISTRY/backend:latest
-    - docker push $DOCKER_REGISTRY/mysql:latest
+    - kubectl config view
+    - kubectl get nodes
 
 deploy_to_k8s:
   stage: deploy
