@@ -13,8 +13,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Clean npm cache and install dependencies
-RUN npm cache clean --force && \
+# Install dependencies - modified approach
+RUN rm -rf /root/.npm && \
     npm config set registry https://registry.npmjs.org/ && \
     npm install --production --no-package-lock && \
     npm install mysql2@3.6.5
