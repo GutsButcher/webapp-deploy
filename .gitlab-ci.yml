@@ -43,5 +43,5 @@ deploy_to_k8s:
     - kubectl apply -f k8s/backend-yamls/
     - kubectl apply -f k8s/frontend-yamls/
     - kubectl apply -f k8s/ingress-yamls/
-  only:
-    - main
+#  only:
+#    - main
