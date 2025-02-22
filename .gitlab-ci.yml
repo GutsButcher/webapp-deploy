@@ -30,7 +30,7 @@ variables:
 debug:
   stage: deploy
   image: 
-    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest  # This image has both AWS CLI and kubectl
+    name: github/aws-kubectl  # This image has both AWS CLI and kubectl
   before_script:
     - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
     - export KUBECONFIG=kubeconfig.yaml
