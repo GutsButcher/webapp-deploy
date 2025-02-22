@@ -35,6 +35,9 @@ deploy_to_k8s:
   before_script:
     - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
     - export KUBECONFIG=kubeconfig.yaml
+        # Add these debug commands
+    - kubectl config view
+    - kubectl get nodes
   script:
     # Create MySQL password secret
     - kubectl create secret generic mysql-secret --from-literal=MYSQL_ROOT_PASSWORD=SecurePassword --dry-run=client -o yaml | kubectl apply -f -
