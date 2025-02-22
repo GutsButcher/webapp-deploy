@@ -27,45 +27,39 @@ variables:
 #     - docker push $DOCKER_REGISTRY/frontend:latest
 #     - docker push $DOCKER_REGISTRY/backend:latest
 #     - docker push $DOCKER_REGISTRY/mysql:latest
-debug_k8s:
-  stage: debug
-  image: 
-    name: bitnami/kubectl:latest
-    entrypoint: [""]
-  before_script:
-    # Debug steps
-    - echo "Checking if KUBE_CONFIG variable exists:"
-    - if [ -n "$KUBE_CONFIG" ]; then echo "KUBE_CONFIG is set"; else echo "KUBE_CONFIG is not set"; fi
-    - echo "Decoding and saving kubeconfig:"
-    - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
-    - echo "Checking kubeconfig file content:"
-    - cat kubeconfig.yaml
-    - echo "Setting KUBECONFIG environment variable:"
-    - export KUBECONFIG=kubeconfig.yaml
-    - echo "Current working directory:"
-    - pwd
-  script:
-    - kubectl config view
-    - kubectl get nodes
-
-deploy_to_k8s:
+debug:
   stage: deploy
   image: 
-    name: bitnami/kubectl:latest
-    entrypoint: [""]
+    name: amazon/aws-cli:latest
   before_script:
+    - yum install -y kubectl
     - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
     - export KUBECONFIG=kubeconfig.yaml
-        # Add these debug commands
-    - kubectl config view
-    - kubectl get nodes
+    # Add AWS credentials
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - export AWS_DEFAULT_REGION=us-east-1
   script:
-    # Create MySQL password secret
-    - kubectl create secret generic mysql-secret --from-literal=MYSQL_ROOT_PASSWORD=SecurePassword --dry-run=client -o yaml | kubectl apply -f -
-    # Apply Kubernetes manifests
-    - kubectl apply -f k8s/db-yamls/
-    - kubectl apply -f k8s/backend-yamls/
-    - kubectl apply -f k8s/frontend-yamls/
-    - kubectl apply -f k8s/ingress-yamls/
+    - kubectl get nodes
+
+# deploy_to_k8s:
+#   stage: deploy
+#   image: 
+#     name: bitnami/kubectl:latest
+#     entrypoint: [""]
+#   before_script:
+#     - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
+#     - export KUBECONFIG=kubeconfig.yaml
+#         # Add these debug commands
+#     - kubectl config view
+#     - kubectl get nodes
+#   script:
+#     # Create MySQL password secret
+#     - kubectl create secret generic mysql-secret --from-literal=MYSQL_ROOT_PASSWORD=SecurePassword --dry-run=client -o yaml | kubectl apply -f -
+#     # Apply Kubernetes manifests
+#     - kubectl apply -f k8s/db-yamls/
+#     - kubectl apply -f k8s/backend-yamls/
+#     - kubectl apply -f k8s/frontend-yamls/
+#     - kubectl apply -f k8s/ingress-yamls/
 #  only:
 #    - main
