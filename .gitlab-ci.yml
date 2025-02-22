@@ -30,7 +30,7 @@ variables:
 debug:
   stage: deploy
   image: 
-    name: github/aws-kubectl  # This image has both AWS CLI and kubectl
+    name: bearengineer/awscli-kubectl  # This image has both AWS CLI and kubectl
   before_script:
     - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
     - export KUBECONFIG=kubeconfig.yaml
