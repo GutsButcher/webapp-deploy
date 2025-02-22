@@ -1,0 +1,19 @@
+stages:
+    - build
+    - deploy
+
+build_images:
+    stage: build
+    image: docker:20.10.16
+    services:
+        - docker:20.10.16-dind
+    script:
+        - echo "We Are Building"
+
+deploy_to_k8s:
+    stage: deploy
+    image: bitnami/kubectl:latest
+    script:
+        - echo "This will deploy to your EKS cluster"
+    only:
+        - main
