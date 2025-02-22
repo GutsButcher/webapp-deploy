@@ -4,6 +4,9 @@ stages:
 
 variables:
   DOCKER_REGISTRY: registry.gitlab.com/gwynbliedd1/webapp-deploy
+  # If your deploy token name is 'ci-registry' for example
+  CI_DEPLOY_USER: gwynbliedd1    # The username shown in deploy token
+  CI_DEPLOY_PASSWORD:  gldt-s-P5uiyza1wDpgeQvPzu # The token value
 
 build_images:
   stage: build
@@ -12,9 +15,9 @@ build_images:
     - docker:20.10.16-dind
   before_script: [
     'echo "Registry: $CI_REGISTRY"',
-    'echo "Registry User: $CI_REGISTRY_USER"',
+    'echo "Registry User: $CI_DEPLOY_USER"',
     'echo "Docker Registry: $DOCKER_REGISTRY"',
-    'echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin'
+    'echo "$CI_DEPLOY_PASSWORD" | docker login $CI_REGISTRY -u $CI_DEPLOY_USER --password-stdin'
   ]
   script:
     - docker build -t $DOCKER_REGISTRY/frontend:latest ./dockerfiles/frontend
