@@ -27,7 +27,8 @@ build_images:
      - docker push $DOCKER_REGISTRY/frontend:latest
      - docker push $DOCKER_REGISTRY/backend:latest
      - docker push $DOCKER_REGISTRY/mysql:latest
-
+  only:
+    - main
 deploy_to_k8s:
   stage: deploy
   image: 
@@ -39,6 +40,7 @@ deploy_to_k8s:
     # Create MySQL password secret
     - kubectl create secret generic mysql-secret --from-literal=MYSQL_ROOT_PASSWORD=SecurePassword --dry-run=client -o yaml | kubectl apply -f -
     # Apply Kubernetes manifests
+    - kubectl create secret simple-app-tls --key=k8s/ingress-yamls/tls.key --cert=k8s/ingress-yamls/tls.crt
     - kubectl apply -f k8s/db-yamls/
     - kubectl apply -f k8s/backend-yamls/
     - kubectl apply -f k8s/frontend-yamls/
