@@ -1,7 +1,3 @@
-stages:
-  - build
-  - deploy
-
 variables:
   # USE YOUR PROJECT GITLAB CONTAINER REGISTRY
   DOCKER_REGISTRY: registry.gitlab.com/gwynbliedd1/webapp-deploy
@@ -9,6 +5,12 @@ variables:
   #[Click on pfp -> preference -> Acsses tokens -> 'create a token with R,W Registry permissions']
   CI_DEPLOY_PASSWORD:  gldt-x-xxxxxxxxxxxxxxxxxx # The token value 
   KUBE_CONTEXT: gwynbliedd1/webapp-deploy:test # test is the kubernetes agent name
+
+stages:
+  - build
+  - deploy
+
+
 
 build_images:
   stage: build
