@@ -32,6 +32,7 @@ debug:
   stage: deploy
   image: 
     name: bitnami/kubectl:latest
+    entrypoint: ['']
   before_script:
     - kubectl config use-context "$KUBE_CONTEXT"
   script:
