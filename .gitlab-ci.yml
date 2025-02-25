@@ -1,6 +1,5 @@
 stages:
   - build
-  - debug
   - deploy
 
 variables:
@@ -10,30 +9,39 @@ variables:
   CI_DEPLOY_PASSWORD:  gldt-s-P5uiyza1wDpgeQvPzu # The token value
   KUBE_CONTEXT: gwynbliedd1/webapp-deploy:test
 
-# build_images:
-#   stage: build
-#   image: docker:20.10.16
-#   services:
-#     - docker:20.10.16-dind
-#   before_script: [
-#     'echo "Registry: $CI_REGISTRY"',
-#     'echo "Registry User: $CI_DEPLOY_USER"',
-#     'echo "Docker Registry: $DOCKER_REGISTRY"',
-#     'echo "$CI_DEPLOY_PASSWORD" | docker login $CI_REGISTRY -u $CI_DEPLOY_USER --password-stdin'
-#   ]
-#   script:
-#     - docker build -t $DOCKER_REGISTRY/frontend:latest ./dockerfiles/frontend
-#     - docker build -t $DOCKER_REGISTRY/backend:latest ./dockerfiles/backend
-#     - docker build -t $DOCKER_REGISTRY/mysql:latest ./dockerfiles/mysql
-#     - docker push $DOCKER_REGISTRY/frontend:latest
-#     - docker push $DOCKER_REGISTRY/backend:latest
-#     - docker push $DOCKER_REGISTRY/mysql:latest
-debug:
+build_images:
+  stage: build
+  image: docker:20.10.16
+  services:
+     - docker:20.10.16-dind
+  before_script: [
+     'echo "Registry: $CI_REGISTRY"',
+     'echo "Registry User: $CI_DEPLOY_USER"',
+     'echo "Docker Registry: $DOCKER_REGISTRY"',
+     'echo "$CI_DEPLOY_PASSWORD" | docker login $CI_REGISTRY -u $CI_DEPLOY_USER --password-stdin'
+   ]
+  script:
+     - docker build -t $DOCKER_REGISTRY/frontend:latest ./dockerfiles/frontend
+     - docker build -t $DOCKER_REGISTRY/backend:latest ./dockerfiles/backend
+     - docker build -t $DOCKER_REGISTRY/mysql:latest ./dockerfiles/mysql
+     - docker push $DOCKER_REGISTRY/frontend:latest
+     - docker push $DOCKER_REGISTRY/backend:latest
+     - docker push $DOCKER_REGISTRY/mysql:latest
+
+deploy_to_k8s:
   stage: deploy
   image: 
     name: bitnami/kubectl:latest
-    entrypoint: ['']
+    entrypoint: [""]
   before_script:
     - kubectl config use-context "$KUBE_CONTEXT"
   script:
-    - kubectl get nodes
+    # Create MySQL password secret
+    - kubectl create secret generic mysql-secret --from-literal=MYSQL_ROOT_PASSWORD=SecurePassword --dry-run=client -o yaml | kubectl apply -f -
+    # Apply Kubernetes manifests
+    - kubectl apply -f k8s/db-yamls/
+    - kubectl apply -f k8s/backend-yamls/
+    - kubectl apply -f k8s/frontend-yamls/
+    - kubectl apply -f k8s/ingress-yamls/
+  only:
+    - cicd
