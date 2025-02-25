@@ -66,11 +66,24 @@ Production-grade deployment with Kubernetes - demonstrates advanced orchestratio
 
 [Kubernetes Deployment](k8s/kubernetes_build.md)
 
+### 4. CI/CD Pipeline
+Automated building, testing, and deployment pipeline using GitLab CI/CD - demonstrates:
+
+- Continuous Integration
+- Continuous Deployment
+- Infrastructure as Code
+- GitLab Kubernetes integration
+
+[CI/CD Setup](cicd/setup.md)
+
 ## Project Structure
 
 ```
 .
 ├── README.md               # This file
+├── .gitlab-ci.yml          # CI/CD pipeline file
+├── cicd/                   # CI/CD configuration
+│   └── setup.md            # CI/CD setup instructions
 ├── docker-compose/         # Docker Compose configuration
 │   └── docker-compose.yml  # Service definitions
 ├── dockerfiles/            # Dockerfile definitions
@@ -91,6 +104,7 @@ Production-grade deployment with Kubernetes - demonstrates advanced orchestratio
 - Docker and Docker CLI
 - Docker Compose (for compose deployment)
 - Kubernetes cluster and kubectl (for Kubernetes deployment)
+- GitLab account (for CI/CD pipeline)
 - Git
 
 ### Quick Start
@@ -193,17 +207,9 @@ curl -k -X POST https://$EXTERNAL_IP/api/users \
 - Default configuration uses self-signed certificates
 - Production deployments should use proper certificate management
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Submit a pull request
 
 ## Future Enhancements
 Potential improvements for this project:
 
 1. **Helm Charts**: Package Kubernetes manifests as Helm charts for easier deployment and management
 2. **Monitoring Stack**: Implement Prometheus and Grafana for metrics collection and visualization
-3. **CI/CD Pipeline**: Set up automated building and deployment with GitHub Actions, Jenkins, or GitLab CI
-4. **Auto-scaling**: Implement Horizontal Pod Autoscaler for dynamic scaling
-5. **Database HA**: Configure a high-availability database cluster
