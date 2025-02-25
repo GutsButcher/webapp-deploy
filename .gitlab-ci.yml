@@ -8,6 +8,7 @@ variables:
   # If your deploy token name is 'ci-registry' for example
   CI_DEPLOY_USER: gwynbliedd1    # The username shown in deploy token
   CI_DEPLOY_PASSWORD:  gldt-s-P5uiyza1wDpgeQvPzu # The token value
+  KUBE_CONTEXT: gwynbliedd1/webapp-deploy:test
 
 # build_images:
 #   stage: build
@@ -30,39 +31,8 @@ variables:
 debug:
   stage: deploy
   image: 
-    name: bearengineer/awscli-kubectl  # This image has both AWS CLI and kubectl
+    name: bitnami/kubectl:latest
   before_script:
-    - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
-    - export KUBECONFIG=kubeconfig.yaml
-    # Add AWS credentials
-    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-    - export AWS_DEFAULT_REGION=us-east-1
-    # Verify AWS CLI works
-    - aws sts get-caller-identity
-    # Test kubectl
-    - kubectl version --client
+    - kubectl config use-context "$KUBE_CONTEXT"
   script:
     - kubectl get nodes
-
-# deploy_to_k8s:
-#   stage: deploy
-#   image: 
-#     name: bitnami/kubectl:latest
-#     entrypoint: [""]
-#   before_script:
-#     - echo "$KUBE_CONFIG" | base64 -d > kubeconfig.yaml
-#     - export KUBECONFIG=kubeconfig.yaml
-#         # Add these debug commands
-#     - kubectl config view
-#     - kubectl get nodes
-#   script:
-#     # Create MySQL password secret
-#     - kubectl create secret generic mysql-secret --from-literal=MYSQL_ROOT_PASSWORD=SecurePassword --dry-run=client -o yaml | kubectl apply -f -
-#     # Apply Kubernetes manifests
-#     - kubectl apply -f k8s/db-yamls/
-#     - kubectl apply -f k8s/backend-yamls/
-#     - kubectl apply -f k8s/frontend-yamls/
-#     - kubectl apply -f k8s/ingress-yamls/
-#  only:
-#    - main
