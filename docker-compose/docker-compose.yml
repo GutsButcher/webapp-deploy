@@ -1,0 +1,53 @@
+services:
+  mysql-db:
+    image: gwynbliedd/simple-mysql:v1.1
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$(cat /run/secrets/mysql_root_password)"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+    secrets:
+      - mysql_root_password
+    networks:
+      - app-network
+
+  backend:
+    image: gwynbliedd/simple-backend:v1.3
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      - MYSQL_HOST=mysql-db
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - MYSQL_DATABASE=simple_app
+    secrets:
+      - mysql_root_password
+    networks:
+      - app-network
+
+  frontend:
+    image: gwynbliedd/simple-frontend:v1.1
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+
+secrets:
+  mysql_root_password:
+    file: ./secrets/mysql_root_password

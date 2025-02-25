@@ -1,93 +1,209 @@
-# webapp-deploy
+# Microservices Demo Application
 
+A demonstration project showcasing a simple web application deployed using three different container orchestration approaches: Docker containers, Docker Compose, and Kubernetes.
 
+## Project Purpose
 
-## Getting started
+This project was created to demonstrate several key concepts in modern application architecture:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+1. **Microservices Separation**: Illustrates clear separation between frontend, backend, and database components
+2. **Infrastructure-level TLS**: Shows how to implement encryption at the infrastructure layer rather than in application code
+3. **API Proxying**: Demonstrates how to hide backend services and route traffic securely
+4. **HTTP Methods**: Practical implementation of different HTTP methods (GET/POST) for API communication
+5. **Container Orchestration**: Compares different approaches to deploying the same application
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+By exploring this project, you'll see how these concepts work together in a real-world application while learning deployment patterns from basic containerization to production-grade Kubernetes configurations.
 
-## Add your files
+## Project Overview
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+This project implements a basic user management system with the following features:
+- Display existing users from database
+- Add new users via form submission
+- Persistent data storage
+- Scalable microservices architecture
+
+The application is built using:
+- **Frontend**: React/Vite with Nginx for static serving and proxying
+- **Backend**: Node.js REST API for user management
+- **Database**: MySQL for data persistence
+
+## Architecture
+
+The application follows a three-tier microservices architecture:
+
+### Docker-compose workflow:
+![alt text](images/image-5.png)
+### K8s workflow:
+![alt text](images/image.png)
+- **Frontend Service**: Serves static content and routes API requests
+- **Backend Service**: Processes HTTP requests and manages database operations
+- **Database Service**: Stores application data persistently
+
+## Deployment Options
+
+This project demonstrates three different deployment approaches, each showcasing different container orchestration capabilities:
+
+### 1. Docker Containers
+
+Individual containers with manual networking - demonstrates basic containerization.
+
+[Building Docker Images](dockerfiles/build.md)
+
+### 2. Docker Compose
+
+Multi-container orchestration using Docker Compose - demonstrates service definitions, networking, volumes, and secrets.
+
+[Docker Compose Deployment](docker-compose/compose.md)
+
+### 3. Kubernetes
+
+Production-grade deployment with Kubernetes - demonstrates advanced orchestration features including:
+- Persistent volumes
+- ConfigMaps and Secrets
+- Health checks
+- Service discovery
+- Ingress with TLS
+
+[Kubernetes Deployment](k8s/kubernetes_build.md)
+
+## Project Structure
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/gwynbliedd1/webapp-deploy.git
-git branch -M main
-git push -uf origin main
+.
+├── README.md               # This file
+├── docker-compose/         # Docker Compose configuration
+│   └── docker-compose.yml  # Service definitions
+├── dockerfiles/            # Dockerfile definitions
+│   ├── backend/            # Backend service files
+│   ├── frontend/           # Frontend service files
+│   └── mysql/              # Database service files
+└── k8s/                    # Kubernetes manifests
+    ├── backend-yamls/      # Backend deployments and services
+    ├── db-yamls/           # Database deployments, services, and storage
+    ├── frontend-yamls/     # Frontend deployments and services
+    └── ingress-yamls/      # Ingress controller and rules
 ```
 
-## Integrate with your tools
+## Getting Started
 
-- [ ] [Set up project integrations](https://gitlab.com/gwynbliedd1/webapp-deploy/-/settings/integrations)
+### Prerequisites
 
-## Collaborate with your team
+- Docker and Docker CLI
+- Docker Compose (for compose deployment)
+- Kubernetes cluster and kubectl (for Kubernetes deployment)
+- Git
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### Quick Start
 
-## Test and Deploy
+Clone the repository:
+```bash
+git clone https://github.com/yourusername/microservices-demo.git
+cd microservices-demo
+```
 
-Use the built-in continuous integration in GitLab.
+Choose a deployment method:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+1. **Docker Compose** (simplest approach):
+   ```bash
+   cd docker-compose
+   mkdir -p ./secrets
+   echo "YourSecurePassword" > ./secrets/mysql_root_password
+   chmod 600 ./secrets/mysql_root_password
+   docker-compose up -d
+   ```
+   Access the application at: http://localhost
 
-***
+2. **Kubernetes**:
+   ```bash
+   cd k8s
+   
+   # Create MySQL password secret
+   kubectl create secret generic mysql-secret --from-literal=MYSQL_ROOT_PASSWORD=SecurePassword
+   
+   # Generate self-signed TLS certificate (for HTTPS)
+   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+     -keyout tls.key -out tls.crt \
+     -subj "/CN=example.com/O=Example Company"
+     
+   # Create TLS secret for Ingress
+   kubectl create secret tls simple-app-tls --cert=tls.crt --key=tls.key
+   
+   # Apply Kubernetes manifests
+   kubectl apply -f db-yamls/
+   kubectl apply -f backend-yamls/
+   kubectl apply -f frontend-yamls/
+   kubectl apply -f ingress-yamls/
+   ```
+   Access the application at the Ingress Controller's external IP address with HTTPS.
 
-# Editing this README
+## API Endpoints
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+The application provides the following REST API endpoints:
 
-## Suggestions for a good README
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/users` | GET | Retrieve all users |
+| `/api/users` | POST | Create a new user |
+| `/health` | GET | Backend health check |
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Development
 
-## Name
-Choose a self-explaining name for your project.
+### Building Images
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Pre-built images are available on Docker Hub under the `gwynbliedd` namespace. To build your own images:
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+cd dockerfiles
+# Follow instructions in build.md
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### Testing
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+#### With Docker Compose
+Test the API endpoints when deployed with Docker Compose:
+```bash
+# Get users
+curl http://localhost/api/users
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+# Add a user
+curl -X POST http://localhost/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com"}'
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+#### With Kubernetes
+Test the API endpoints when deployed with Kubernetes:
+```bash
+# Get the external IP of the LoadBalancer
+EXTERNAL_IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+# Get users (note the HTTPS and -k flag for self-signed cert)
+curl -k https://$EXTERNAL_IP/api/users
+
+# Add a user
+curl -k -X POST https://$EXTERNAL_IP/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com"}'
+```
+
+## Security Notes
+
+- TLS encryption is implemented in the Kubernetes deployment
+- Database passwords are stored as secrets
+- Default configuration uses self-signed certificates
+- Production deployments should use proper certificate management
 
 ## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+1. Fork the repository
+2. Create your feature branch
+3. Submit a pull request
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## Future Enhancements
+Potential improvements for this project:
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+1. **Helm Charts**: Package Kubernetes manifests as Helm charts for easier deployment and management
+2. **Monitoring Stack**: Implement Prometheus and Grafana for metrics collection and visualization
+3. **CI/CD Pipeline**: Set up automated building and deployment with GitHub Actions, Jenkins, or GitLab CI
+4. **Auto-scaling**: Implement Horizontal Pod Autoscaler for dynamic scaling
+5. **Database HA**: Configure a high-availability database cluster

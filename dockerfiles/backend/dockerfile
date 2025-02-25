@@ -1,0 +1,31 @@
+# Base Image
+FROM node:18-alpine
+
+# Install PM2 globally
+RUN npm install -g npm@10.2.4 pm2
+
+# Set default environment variables
+ENV PORT=3000 
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies - modified approach
+RUN rm -rf /root/.npm && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm install --production --no-package-lock && \
+    npm install mysql2@3.6.5
+
+# Copy source code
+COPY . .
+
+# Copy and setup entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 3000
+
+ENTRYPOINT ["/entrypoint.sh"]
