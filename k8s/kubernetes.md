@@ -358,3 +358,6 @@ kubectl delete secret mysql-secret simple-app-tls
 kubectl delete pvc mysql-pvc
 kubectl delete pv mysql-pv
 ```
+
+## Next Step
+[Integrate with CI/CD pipeline for automated deployments](../cicd/setup.md)
