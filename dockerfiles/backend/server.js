@@ -1,6 +1,7 @@
 import express from 'express';
 import mysql from 'mysql2/promise';
 import cors from 'cors';
+import initDatabase from './db-init.js';  // Import the init function
 
 const app = express();
 
@@ -10,11 +11,11 @@ app.use(express.json());
 
 // MySQL Connection Configuration
 const dbConfig = {
-    host: process.env.MYSQL_HOST || 'mysql-db', // Changed from mysql-service to mysql-db
+    host: process.env.MYSQL_HOST || 'mysql-db',
     port: process.env.MYSQL_PORT || 3306,
     user: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || '',
-    database: process.env.MYSQL_DATABASE || 'simple_app'
+    database: process.env.MYSQL_DATABASE || 'simple_webapp'
 };
 
 // Create connection pool
@@ -80,6 +81,7 @@ app.post('/api/users', async (req, res) => {
 // Initialize database and start server
 const startServer = async () => {
     try {
+        await initDatabase();  // Initialize the database before connecting
         await initializeDb();
         const port = process.env.PORT || 3000;
         app.listen(port, '0.0.0.0', () => {
@@ -96,5 +98,6 @@ const startServer = async () => {
         process.exit(1);
     }
 };
+
 
 startServer();
